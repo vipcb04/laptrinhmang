@@ -40,30 +40,15 @@ public class DocumentUploadServlet extends HttpServlet {
 		service.start();
 		
 		 Part[] files = request.getParts().toArray(new Part[0]);
+		 DocumentBO docBO = new DocumentBO();
 		 for (Part filePart : files) {
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-        String uploadDir = getServletContext().getRealPath("/uploads");
-        File uploadDirFile = new File(uploadDir);
-        if (!uploadDirFile.exists()) {
-            uploadDirFile.mkdir();
-        }
-        String filePath = uploadDir + File.separator + fileName;
-        System.out.println(filePath);
-        filePart.write(filePath);
-        Documents doc = new Documents();
-        HttpSession session = request.getSession();
-        int userid = (int) session.getAttribute("userid");
-        System.out.println(userid);
-        doc.setUserId(userid);
-        doc.setInputPath(filePath);
-        doc.setStatus("pending");
-        doc.setOutputPath("");
-        doc.setFileName(fileName);
-        DocumentBO docBO = new DocumentBO();
-        int docID = docBO.saveDocument(doc);
-        System.out.println("luu file: "+ docID);
-        doc.setId(docID);
-        QueueManager.addDocument(doc);
+			 Documents doc = docBO.createDocument(request, filePart);
+		        
+		        int docID = docBO.saveDocument(doc);
+		        System.out.println("Lưu file: " + docID);
+		        doc.setId(docID);
+		        
+		        QueueManager.addDocument(doc);
 
 		 }
 		  response.sendRedirect("ResultServlet");
